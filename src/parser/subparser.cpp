@@ -2127,8 +2127,8 @@ void explodeAnyTLS(std::string anytls, Proxy &node) {
 }
 
 void explodeStdVLESS(std::string vless, Proxy &node) {
-    std::string add, port, uuid, sni, alpn, net, type, mode, host, path, fingerprint, remarks, addition, flow, xtls, public_key, short_id, security, tls;
-    tribool tfo, scv;
+    std::string add, port, uuid, sni, alpn, net, type, mode, host, path, fingerprint, client_fingerprint, remarks, addition, flow, xtls, public_key, short_id, security, tls;
+    tribool udp = tribool(true), tfo, scv;
     std::string decoded, userinfo, hostinfo;
     string_array user_parts;
 
@@ -2185,6 +2185,7 @@ void explodeStdVLESS(std::string vless, Proxy &node) {
         net = getUrlArg(addition,"type");
         alpn = getUrlArg(addition, "alpn");
         fingerprint = getUrlArg(addition, "hpkp");
+        client_fingerprint = getUrlArg(addition, "fp");
         flow = getUrlArg(addition, "flow");
         xtls = getUrlArg(addition, "xtls");
         public_key = getUrlArg(addition, "pbk");
@@ -2199,6 +2200,15 @@ void explodeStdVLESS(std::string vless, Proxy &node) {
         switch(hash_(net))
         {
             case "tcp"_hash:
+                type = getUrlArg(addition, "headerType");
+                host = getUrlArg(addition, "host");
+                path = getUrlArg(addition, "path");
+                if(type.empty() || type == "none")
+                {
+                    host.clear();
+                    path.clear();
+                }
+                break;
             case "ws"_hash:
             case "h2"_hash:
                 type = getUrlArg(addition, "headerType");
@@ -2229,7 +2239,7 @@ void explodeStdVLESS(std::string vless, Proxy &node) {
     if (remarks.empty())
         remarks = add + ":" + port;
     node.TLSSecure = security == "tls" || security == "reality";
-    vlessConstruct(node, VLESS_DEFAULT_GROUP, remarks, add, port, uuid, sni, alpn, type, net, mode, host, path, fingerprint, flow, xtls, public_key, short_id, "", tribool(), tfo, scv, "");
+    vlessConstruct(node, VLESS_DEFAULT_GROUP, remarks, add, port, uuid, sni, alpn, type, net, mode, host, path, fingerprint, flow, xtls, public_key, short_id, client_fingerprint, udp, tfo, scv, "");
 }
 
 void explodeVLESS(std::string vless, Proxy &node) {
