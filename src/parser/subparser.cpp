@@ -903,6 +903,7 @@ void explodeSSRConf(std::string content, std::vector<Proxy> &nodes)
 void explodeSocks(std::string link, Proxy &node)
 {
     std::string group, remarks, server, port, username, password;
+    tribool udp;
     if(strFind(link, "socks://")) //v2rayn socks link
     {
         if(strFind(link, "#"))
@@ -938,6 +939,7 @@ void explodeSocks(std::string link, Proxy &node)
         password = urlDecode(getUrlArg(link, "pass"));
         remarks = urlDecode(getUrlArg(link, "remarks"));
         group = urlDecode(getUrlArg(link, "group"));
+        udp = tribool(getUrlArg(link, "udp"));
     }
     if(group.empty())
         group = SOCKS_DEFAULT_GROUP;
@@ -946,7 +948,7 @@ void explodeSocks(std::string link, Proxy &node)
     if(port == "0")
         return;
 
-    socksConstruct(node, group, remarks, server, port, username, password);
+    socksConstruct(node, group, remarks, server, port, username, password, udp);
 }
 
 void explodeHTTP(const std::string &link, Proxy &node)
